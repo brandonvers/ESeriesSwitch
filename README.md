@@ -1,10 +1,16 @@
-<img src="Assets/icon_256.png" width="96" align="right" alt="ESeriesSwitch icon">
+<p align="center">
+  <img src="Assets/icon_256.png" width="112" alt="ESeriesSwitch icon">
+</p>
 
-# E-Series ⇄ ISTA+ Switch
+<h1 align="center">E-Series ⇄ ISTA+ Switch</h1>
 
-**One-click switching between the legacy BMW E-series coding tools and the official BMW ISTA+ on the same Windows PC.**
+<p align="center">
+  <b>One-click switching between the legacy BMW E-series coding tools and the official BMW ISTA+ on the same Windows PC.</b>
+</p>
 
-🇭🇺 [Magyar leírás / Hungarian README](README.hu.md)
+<p align="center">
+  🇭🇺 <a href="README.hu.md">Magyar leírás / Hungarian README</a>
+</p>
 
 <p align="center">
   <img src="docs/screenshot-en.png" width="480" alt="ESeriesSwitch main window">
