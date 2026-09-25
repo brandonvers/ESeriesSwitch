@@ -1,0 +1,14 @@
+<Application x:Class="ESeriesSwitch.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ESeriesSwitch"
+             StartupUri="MainWindow.xaml"
+             ThemeMode="System">
+    <Application.Resources>
+        <SolidColorBrush x:Key="IstaBrush" Color="#16A34A"/>
+        <SolidColorBrush x:Key="ESeriesBrush" Color="#F7630C"/>
+        <SolidColorBrush x:Key="MixedBrush" Color="#D13438"/>
+        <SolidColorBrush x:Key="WarningBackgroundBrush" Color="#26F7B500"/>
+        <SolidColorBrush x:Key="WarningBorderBrush" Color="#80F7B500"/>
+    </Application.Resources>
+</Application>

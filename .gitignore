@@ -1,0 +1,12 @@
+# Build kimenet (a kész exe is ide kerül: bin\publish)
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio saját / felhasználói fájlok
+.vs/
+*.user
+*.suo
+*.rsuser
+
+# Egyéb
+*.log
