@@ -4,7 +4,7 @@
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <!-- A rendszerszintű (HKLM) környezeti változók írásához rendszergazdai jog kell -->
+        <!-- Writing the system-wide (HKLM) environment variables requires administrator rights -->
         <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
       </requestedPrivileges>
     </security>

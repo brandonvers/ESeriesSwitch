@@ -4,21 +4,34 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ESeriesSwitch"
+        xmlns:loc="clr-namespace:ESeriesSwitch.Localization"
         mc:Ignorable="d"
         Title="E-Series ⇄ ISTA+ Switch"
         Icon="Assets/app.ico"
-        Width="580" SizeToContent="Height"
+        Width="600" SizeToContent="Height"
         ResizeMode="CanMinimize"
         WindowStartupLocation="CenterScreen">
     <StackPanel Margin="28,24,28,24">
 
-        <!-- Fejléc -->
-        <TextBlock Text="E-Series ⇄ ISTA+ Switch" FontSize="26" FontWeight="SemiBold"/>
+        <!-- Header -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="E-Series ⇄ ISTA+ Switch" FontSize="26" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button x:Name="EnglishButton" Content="EN" MinWidth="44" Padding="8,4" Click="English_Click"
+                        ToolTip="English"/>
+                <Button x:Name="HungarianButton" Content="HU" MinWidth="44" Padding="8,4" Margin="6,0,0,0"
+                        Click="Hungarian_Click" ToolTip="Magyar"/>
+            </StackPanel>
+        </Grid>
         <TextBlock Margin="0,4,0,22" TextWrapping="Wrap"
                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                   Text="Váltás a régi E-szériás kódoló toolok (INPA, WinKFP, NCS Expert, Tool32) és a gyári AOS-ból letöltött ISTA+ között."/>
+                   Text="{Binding [Subtitle], Source={x:Static loc:Loc.Instance}}"/>
 
-        <!-- Állapotkártya -->
+        <!-- Status card -->
         <Border CornerRadius="8" BorderThickness="1" Padding="0"
                 Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
@@ -30,13 +43,15 @@
                 <Border x:Name="StatusStripe" CornerRadius="8,0,0,8" Background="{StaticResource MixedBrush}"/>
 
                 <StackPanel Grid.Column="1" Margin="20,18,20,18">
-                    <TextBlock Text="JELENLEG AKTÍV" FontSize="11" FontWeight="SemiBold"
-                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    <TextBlock FontSize="11" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               Text="{Binding [CurrentlyActive], Source={x:Static loc:Loc.Instance}}"/>
                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                         <Ellipse x:Name="StatusDot" Width="14" Height="14" VerticalAlignment="Center"
                                  Fill="{StaticResource MixedBrush}"/>
                         <TextBlock x:Name="StatusTitle" Margin="10,0,0,0" FontSize="22" FontWeight="SemiBold"
-                                   VerticalAlignment="Center" Text="Betöltés…"/>
+                                   VerticalAlignment="Center"
+                                   Text="{Binding [Loading], Source={x:Static loc:Loc.Instance}, Mode=OneTime}"/>
                     </StackPanel>
                     <TextBlock x:Name="StatusSubtitle" Margin="24,4,0,0" TextWrapping="Wrap"
                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
@@ -67,13 +82,14 @@
             </Grid>
         </Border>
 
-        <!-- EDIABAS interfész (EDIABAS.INI) -->
+        <!-- EDIABAS interface (EDIABAS.INI) -->
         <Border x:Name="InterfaceCard" Margin="0,12,0,0" CornerRadius="8" BorderThickness="1" Padding="20,16"
                 Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
             <StackPanel>
-                <TextBlock Text="EDIABAS INTERFÉSZ" FontSize="11" FontWeight="SemiBold"
-                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                <TextBlock FontSize="11" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           Text="{Binding [InterfaceHeader], Source={x:Static loc:Loc.Instance}}"/>
                 <Grid Margin="0,8,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -85,16 +101,17 @@
                         <TextBlock x:Name="InterfaceValue" FontFamily="Consolas" FontSize="12" Margin="0,2,0,0"
                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                     </StackPanel>
-                    <Button x:Name="IcomButton" Grid.Column="1" MinWidth="90" Content="ICOM" Click="Icom_Click"/>
-                    <Button x:Name="OfflineButton" Grid.Column="2" MinWidth="90" Margin="8,0,0,0"
-                            Content="Offline" Click="Offline_Click"/>
+                    <Button x:Name="IcomButton" Grid.Column="1" MinWidth="90" Click="Icom_Click"
+                            Content="{Binding [ButtonIcom], Source={x:Static loc:Loc.Instance}}"/>
+                    <Button x:Name="OfflineButton" Grid.Column="2" MinWidth="90" Margin="8,0,0,0" Click="Offline_Click"
+                            Content="{Binding [ButtonOffline], Source={x:Static loc:Loc.Instance}}"/>
                 </Grid>
                 <TextBlock x:Name="InterfaceHint" Margin="0,10,0,0" TextWrapping="Wrap" FontSize="12"
                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
             </StackPanel>
         </Border>
 
-        <!-- Figyelmeztetések -->
+        <!-- Warnings -->
         <Border x:Name="WarningBox" Visibility="Collapsed" Margin="0,12,0,0" Padding="14,10"
                 CornerRadius="6" BorderThickness="1"
                 Background="{StaticResource WarningBackgroundBrush}"
@@ -102,17 +119,17 @@
             <TextBlock x:Name="WarningText" TextWrapping="Wrap"/>
         </Border>
 
-        <!-- Váltógombok -->
+        <!-- Switch buttons -->
         <Button x:Name="ToESeriesButton" Margin="0,20,0,0" Height="48" FontSize="15"
                 HorizontalAlignment="Stretch" Style="{DynamicResource AccentButtonStyle}"
-                Content="Váltás E-szériás toolokra  (INPA / WinKFP / EDIABAS)"
+                Content="{Binding [SwitchToESeries], Source={x:Static loc:Loc.Instance}}"
                 Click="ToESeries_Click"/>
         <Button x:Name="ToIstaButton" Margin="0,10,0,0" Height="48" FontSize="15"
                 HorizontalAlignment="Stretch" Style="{DynamicResource AccentButtonStyle}"
-                Content="Váltás gyári ISTA+ -ra"
+                Content="{Binding [SwitchToIsta], Source={x:Static loc:Loc.Instance}}"
                 Click="ToIsta_Click"/>
 
-        <!-- Újraindítás sáv -->
+        <!-- Restart banner -->
         <Border x:Name="RebootBanner" Visibility="Collapsed" Margin="0,16,0,0" Padding="14,10"
                 CornerRadius="6" BorderThickness="1"
                 Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
@@ -123,21 +140,27 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,12,0"
-                           Text="A váltás teljes érvényesüléséhez újraindítás ajánlott."/>
-                <Button Grid.Column="1" Content="Újraindítás most" Click="Reboot_Click"/>
+                           Text="{Binding [RebootRecommended], Source={x:Static loc:Loc.Instance}}"/>
+                <Button Grid.Column="1" Click="Reboot_Click"
+                        Content="{Binding [RestartNow], Source={x:Static loc:Loc.Instance}}"/>
             </Grid>
         </Border>
 
-        <!-- Lábléc -->
+        <!-- Footer -->
         <Grid Margin="0,22,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Button Content="Frissítés" Click="Refresh_Click"/>
-            <Button Grid.Column="1" Margin="8,0,0,0" Content="Mentések mappája" Click="OpenBackups_Click"/>
-            <TextBlock x:Name="VersionText" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
+            <Button Click="Refresh_Click"
+                    Content="{Binding [Refresh], Source={x:Static loc:Loc.Instance}}"/>
+            <Button Grid.Column="1" Margin="8,0,0,0" Click="OpenBackups_Click"
+                    Content="{Binding [OpenBackups], Source={x:Static loc:Loc.Instance}}"/>
+            <Button Grid.Column="2" Margin="8,0,0,0" Click="About_Click"
+                    Content="{Binding [About], Source={x:Static loc:Loc.Instance}}"/>
+            <TextBlock x:Name="VersionText" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center"
                        FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}"/>
         </Grid>
     </StackPanel>

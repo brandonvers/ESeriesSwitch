@@ -1,4 +1,6 @@
-﻿param([string]$OutDir)
+# Generates app.ico (and PNG previews) for ESeriesSwitch.
+# Usage (Windows PowerShell, STA):  powershell -STA -File make-icon.ps1 -OutDir .\Assets
+param([string]$OutDir)
 Add-Type -AssemblyName PresentationCore, PresentationFramework, WindowsBase
 $ErrorActionPreference = 'Stop'
 
@@ -24,7 +26,7 @@ function Add-Arrow($dc, $cx, $cy, $r, $a0, $a1, $pen, $fill, $headLen, $headW) {
     $ctx.Close()
     $dc.DrawGeometry($null, $pen, $g)
 
-    # NyÃ­lhegy az Ã­v vÃ©gÃ©n, Ã©rintÅ‘ irÃ¡nyba
+    # Arrow head at the end of the arc, pointing along the tangent
     $tx = -[Math]::Sin($rad1); $ty = [Math]::Cos($rad1)
     $nx = [Math]::Cos($rad1); $ny = [Math]::Sin($rad1)
     $tip = P ($end.X + $tx * $headLen) ($end.Y + $ty * $headLen)
@@ -56,7 +58,7 @@ function Render([int]$size) {
     $green = New-Brush '#34D399' '#15803D'
     $white = [System.Windows.Media.Brushes]::White
 
-    # ÃtlÃ³ mentÃ©n kettÃ©osztva: bal-fent narancs (E-szÃ©ria), jobb-lent zÃ¶ld (ISTA+)
+    # Split along the diagonal: top-left orange (E-series), bottom-right green (ISTA+)
     $dc.DrawRectangle($green, $null, $rect)
     $tri = New-Object System.Windows.Media.StreamGeometry
     $tc = $tri.Open()
@@ -111,7 +113,7 @@ foreach ($sz in $sizes) {
     [IO.File]::WriteAllBytes((Join-Path $OutDir "icon_$sz.png"), $pngs[$sz])
 }
 
-# ICO Ã¶sszerakÃ¡sa PNG bejegyzÃ©sekbÅ‘l
+# Build the ICO from PNG entries
 $ms = New-Object System.IO.MemoryStream
 $bw = New-Object System.IO.BinaryWriter($ms)
 $bw.Write([UInt16]0); $bw.Write([UInt16]1); $bw.Write([UInt16]$sizes.Count)

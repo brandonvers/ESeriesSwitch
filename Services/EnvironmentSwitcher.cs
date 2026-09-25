@@ -1,35 +1,43 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using ESeriesSwitch.Localization;
 using Microsoft.Win32;
 
 namespace ESeriesSwitch.Services
 {
     public enum ToolMode
     {
-        /// <summary>Gyári ISTA+: nincs EDIABAS a rendszer környezeti változóiban.</summary>
+        /// <summary>Factory ISTA+: EDIABAS is not in the system environment variables.</summary>
         Ista,
-        /// <summary>Régi E-szériás toolok: EDIABAS_CONFIG_DIR és PATH beállítva.</summary>
+        /// <summary>Legacy E-series tools: EDIABAS config variable and PATH entry are both set.</summary>
         ESeries,
-        /// <summary>Csak az egyik beállítás van jelen.</summary>
+        /// <summary>Only one of the two settings is present.</summary>
         Mixed
     }
 
     public sealed record EnvStatus(
         ToolMode Mode,
+        string EdiabasBin,
         string? ConfigDirValue,
         bool PathContainsEdiabas,
         IReadOnlyList<string> Warnings);
 
     /// <summary>
-    /// A rendszerszintű (HKLM) környezeti változókat kapcsolja a régi E-szériás toolok
-    /// (INPA, WinKFP, NCS Expert, Tool32) és a gyári ISTA+ között.
+    /// Switches the system-wide (HKLM) environment variables between the legacy E-series tools
+    /// (INPA, WinKFP, NCS Expert, Tool32) and the factory ISTA+.
     /// </summary>
     public static class EnvironmentSwitcher
     {
-        // Pontosan így (kisbetűvel) szerepelt eredetileg a gépen; a felismerés kis-nagybetű független.
-        public const string EdiabasBin = @"c:\ec-apps\ediabas\bin";
         public const string ConfigDirName = "ediabas_config_dir";
+
+        // Known EDIABAS install locations, in order of preference. The first one that exists is used
+        // when the config variable is not set (e.g. while ISTA+ mode is active).
+        static readonly string[] KnownEdiabasBins =
+        [
+            @"c:\ec-apps\ediabas\bin",
+            @"C:\EDIABAS\BIN",
+        ];
 
         const string SystemEnvKey = @"SYSTEM\CurrentControlSet\Control\Session Manager\Environment";
         const string UserEnvKey = "Environment";
@@ -39,14 +47,19 @@ namespace ESeriesSwitch.Services
             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
             "ESeriesSwitch", "Backups");
 
+        /// <summary>The EDIABAS\BIN folder the app works with. Refreshed by <see cref="GetStatus"/>.</summary>
+        public static string EdiabasBin { get; private set; } = KnownEdiabasBins[0];
+
         public static EnvStatus GetStatus()
         {
             var warnings = new List<string>();
 
             using var key = Registry.LocalMachine.OpenSubKey(SystemEnvKey, writable: false)
-                ?? throw new InvalidOperationException("A rendszer környezeti változóinak kulcsa nem olvasható.");
+                ?? throw new InvalidOperationException(Loc.T("ErrEnvKeyRead"));
 
             var configDir = ReadString(key, ConfigDirName);
+            EdiabasBin = DetectEdiabasBin(configDir);
+
             var path = ReadString(key, PathName) ?? "";
             bool hasVar = !string.IsNullOrWhiteSpace(configDir);
             bool inPath = SplitPath(path).Any(IsEdiabasEntry);
@@ -58,42 +71,42 @@ namespace ESeriesSwitch.Services
                 _ => ToolMode.Mixed
             };
 
-            if (hasVar && !IsEdiabasEntry(configDir!))
-                warnings.Add($"Az {ConfigDirName} értéke eltér a megszokottól: {configDir}");
+            if (hasVar && !Directory.Exists(Expand(configDir!)))
+                warnings.Add(Loc.T("WarnConfigDirMissingFolder", ConfigDirName, configDir));
+            else if (!Directory.Exists(EdiabasBin))
+                warnings.Add(Loc.T("WarnFolderMissing", EdiabasBin));
 
-            if (!Directory.Exists(EdiabasBin))
-                warnings.Add($"A(z) {EdiabasBin} mappa nem létezik ezen a gépen.");
-
-            // A felhasználói szintű változók felülírhatják a rendszerszintűeket, ezeket nem módosítjuk, csak jelezzük.
+            // User-level variables can override the system ones. They are only reported, never changed.
             using (var userKey = Registry.CurrentUser.OpenSubKey(UserEnvKey, writable: false))
             {
                 if (userKey != null)
                 {
                     if (!string.IsNullOrWhiteSpace(ReadString(userKey, ConfigDirName)))
-                        warnings.Add($"A felhasználói változók között is van {ConfigDirName}. Ezt az app nem módosítja, érdemes kézzel törölni.");
+                        warnings.Add(Loc.T("WarnUserVar", ConfigDirName));
                     if (SplitPath(ReadString(userKey, PathName) ?? "").Any(IsEdiabasEntry))
-                        warnings.Add("A felhasználói PATH is tartalmazza az EDIABAS mappát. Ezt az app nem módosítja, érdemes kézzel törölni.");
+                        warnings.Add(Loc.T("WarnUserPath"));
                 }
             }
 
-            return new EnvStatus(mode, configDir, inPath, warnings);
+            return new EnvStatus(mode, EdiabasBin, configDir, inPath, warnings);
         }
 
-        /// <summary>Átkapcsol a megadott módra. Visszaadja a mentés fájl útvonalát.</summary>
+        /// <summary>Switches to the given mode. Returns the path of the backup file.</summary>
         public static string SwitchTo(ToolMode target)
         {
             if (target == ToolMode.Mixed)
-                throw new ArgumentException("Vegyes állapotra nem lehet váltani.", nameof(target));
+                throw new ArgumentException("Cannot switch to the mixed state.", nameof(target));
 
             using var key = Registry.LocalMachine.OpenSubKey(SystemEnvKey, writable: true)
-                ?? throw new InvalidOperationException("A rendszer környezeti változóinak kulcsa nem írható.");
+                ?? throw new InvalidOperationException(Loc.T("ErrEnvKeyWrite"));
 
             var path = ReadString(key, PathName) ?? "";
-            // A PATH típusát (általában REG_EXPAND_SZ) meg kell tartani, különben a %SystemRoot% és társai eltörnek.
+            // Keep the value type of PATH (normally REG_EXPAND_SZ), otherwise %SystemRoot% and friends stop expanding.
             var pathKind = key.GetValueNames().Contains(PathName, StringComparer.OrdinalIgnoreCase)
                 ? key.GetValueKind(PathName)
                 : RegistryValueKind.ExpandString;
             var configDir = ReadString(key, ConfigDirName);
+            EdiabasBin = DetectEdiabasBin(configDir);
 
             var backupFile = WriteBackup(target, path, pathKind, configDir);
 
@@ -126,16 +139,30 @@ namespace ESeriesSwitch.Services
             });
         }
 
+        // An existing config variable wins (keeping its exact spelling), then the first known folder that exists.
+        static string DetectEdiabasBin(string? configDir)
+        {
+            if (!string.IsNullOrWhiteSpace(configDir) && Directory.Exists(Expand(configDir)))
+                return configDir.Trim();
+            return KnownEdiabasBins.FirstOrDefault(Directory.Exists) ?? KnownEdiabasBins[0];
+        }
+
         static string? ReadString(RegistryKey key, string name) =>
             key.GetValue(name, null, RegistryValueOptions.DoNotExpandEnvironmentNames) as string;
 
-        // Az üres elemeket is megtartjuk, hogy a többi bejegyzéshez egyáltalán ne nyúljunk.
+        // Empty entries are kept as well, so that the rest of PATH is left exactly as it was.
         static string[] SplitPath(string path) => path.Length == 0 ? [] : path.Split(';');
 
+        static string Expand(string value) => Environment.ExpandEnvironmentVariables(value.Trim().Trim('"')).TrimEnd('\\');
+
+        // Any known EDIABAS folder counts, so switching to ISTA+ removes all of them from PATH.
         static bool IsEdiabasEntry(string entry)
         {
-            var normalized = Environment.ExpandEnvironmentVariables(entry.Trim().Trim('"')).TrimEnd('\\');
-            return string.Equals(normalized, EdiabasBin, StringComparison.OrdinalIgnoreCase);
+            if (entry.Trim().Length == 0)
+                return false;
+            var normalized = Expand(entry);
+            return KnownEdiabasBins.Append(EdiabasBin)
+                .Any(bin => string.Equals(normalized, Expand(bin), StringComparison.OrdinalIgnoreCase));
         }
 
         static string WriteBackup(ToolMode target, string path, RegistryValueKind pathKind, string? configDir)
@@ -155,8 +182,8 @@ namespace ESeriesSwitch.Services
             return file;
         }
 
-        // Szól a Windowsnak (Explorer stb.), hogy változtak a környezeti változók,
-        // így az újonnan indított programok már az új értékeket kapják.
+        // Tells Windows (Explorer etc.) that the environment changed,
+        // so newly started programs get the new values.
         static void BroadcastEnvironmentChange()
         {
             SendMessageTimeout(HWND_BROADCAST, WM_SETTINGCHANGE, UIntPtr.Zero, "Environment",

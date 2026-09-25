@@ -1,13 +1,14 @@
-﻿using System.IO;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using ESeriesSwitch.Localization;
 
 namespace ESeriesSwitch.Services
 {
     /// <summary>
-    /// Az EDIABAS.INI [Configuration] szekciójában lévő "Interface" sor olvasása és átírása.
-    /// ICOM módban (RPLUS:ICOM_P) az EDIABAS indításkor az ICOM-ot keresi, és ha nincs
-    /// csatlakoztatva, az INPA / Tool32 NET-0009 TIMEOUT hibát ad. NUL-lal hibaüzenet nélkül indulnak.
+    /// Reads and rewrites the "Interface" line in the [Configuration] section of EDIABAS.INI.
+    /// In ICOM mode (RPLUS:ICOM_P) EDIABAS looks for the ICOM on startup, and without a connected ICOM
+    /// INPA / Tool32 show a NET-0009 TIMEOUT error. With NUL they start without an error.
     /// </summary>
     public static class EdiabasConfig
     {
@@ -16,7 +17,7 @@ namespace ESeriesSwitch.Services
 
         public static string IniPath => Path.Combine(EnvironmentSwitcher.EdiabasBin, "EDIABAS.INI");
 
-        // Latin1: bájtra pontos oda-vissza alakítás, így a fájl többi része (ékezetek, sorvégek) érintetlen marad.
+        // Latin1 round-trips every byte, so the rest of the file (accents, line endings) stays untouched.
         static readonly Encoding FileEncoding = Encoding.Latin1;
 
         static readonly Regex SectionRegex = new(@"^\[Configuration\][ \t]*\r?$",
@@ -25,7 +26,7 @@ namespace ESeriesSwitch.Services
         static readonly Regex InterfaceRegex = new(@"^[ \t]*Interface[ \t]*=(?<value>[^\r\n;]*)",
             RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
-        /// <summary>Az aktuális Interface érték, vagy null, ha az INI nem található / nincs benne ilyen sor.</summary>
+        /// <summary>The current Interface value, or null if the INI or the line does not exist.</summary>
         public static string? ReadInterface()
         {
             if (!File.Exists(IniPath))
@@ -35,17 +36,17 @@ namespace ESeriesSwitch.Services
             return match?.Groups["value"].Value.Trim();
         }
 
-        /// <summary>Átírja az Interface értékét. Előtte mentést készít az INI-ről.</summary>
+        /// <summary>Rewrites the Interface value. Makes a backup copy of the INI first.</summary>
         public static void SetInterface(string value)
         {
             var text = FileEncoding.GetString(File.ReadAllBytes(IniPath));
             var match = FindInterface(text)
-                ?? throw new InvalidOperationException("Az EDIABAS.INI [Configuration] részében nem található 'Interface' sor.");
+                ?? throw new InvalidOperationException(Loc.T("ErrInterfaceLineMissing"));
 
             Directory.CreateDirectory(EnvironmentSwitcher.BackupDir);
             File.Copy(IniPath, Path.Combine(EnvironmentSwitcher.BackupDir, $"EDIABAS_{DateTime.Now:yyyyMMdd_HHmmss}.INI"), overwrite: true);
 
-            // Az érték körüli szóközöket (és egy esetleges ; megjegyzés előtti részt) meghagyjuk
+            // Keep the whitespace around the value (and anything before a ; comment)
             var group = match.Groups["value"];
             var old = group.Value;
             var leading = old[..(old.Length - old.TrimStart().Length)];
