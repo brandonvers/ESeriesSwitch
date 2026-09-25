@@ -20,6 +20,22 @@ az ISTA+ viszont csak akkor működik rendesen, ha nincs ott. Az app ezt állít
 - A PATH többi bejegyzéséhez és a típusához (`REG_EXPAND_SZ`) nem nyúl.
 - Váltás után újraindítást ajánl fel.
 
+## EDIABAS interfész
+
+Az `EDIABAS.INI` `Interface` sora külön gombokkal állítható (csak ezekre kattintva módosul):
+
+| Gomb | Érték | Mikor |
+|---|---|---|
+| ICOM | `RPLUS:ICOM_P` | ICOM az autón, diagnosztika / kódolás |
+| Offline | `NUL` | nincs ICOM: az INPA / Tool32 a `NET-0009: TIMEOUT` hiba nélkül indul |
+
+Módosítás előtt az INI-ről is mentés készül a fenti mappába.
+
+## Verziók
+
+- **1.0.1**: EDIABAS interfész (ICOM / Offline) kijelzése és váltása
+- **1.0.0**: első verzió, váltás az E-szériás toolok és az ISTA+ között
+
 ## Fordítás
 
 - Visual Studio 2026, .NET 10, WPF

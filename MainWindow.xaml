@@ -67,6 +67,33 @@
             </Grid>
         </Border>
 
+        <!-- EDIABAS interfész (EDIABAS.INI) -->
+        <Border x:Name="InterfaceCard" Margin="0,12,0,0" CornerRadius="8" BorderThickness="1" Padding="20,16"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+            <StackPanel>
+                <TextBlock Text="EDIABAS INTERFÉSZ" FontSize="11" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                        <TextBlock x:Name="InterfaceTitle" FontSize="16" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="InterfaceValue" FontFamily="Consolas" FontSize="12" Margin="0,2,0,0"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    </StackPanel>
+                    <Button x:Name="IcomButton" Grid.Column="1" MinWidth="90" Content="ICOM" Click="Icom_Click"/>
+                    <Button x:Name="OfflineButton" Grid.Column="2" MinWidth="90" Margin="8,0,0,0"
+                            Content="Offline" Click="Offline_Click"/>
+                </Grid>
+                <TextBlock x:Name="InterfaceHint" Margin="0,10,0,0" TextWrapping="Wrap" FontSize="12"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+            </StackPanel>
+        </Border>
+
         <!-- Figyelmeztetések -->
         <Border x:Name="WarningBox" Visibility="Collapsed" Margin="0,12,0,0" Padding="14,10"
                 CornerRadius="6" BorderThickness="1"
