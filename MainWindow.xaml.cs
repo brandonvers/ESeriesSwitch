@@ -11,21 +11,48 @@ namespace ESeriesSwitch
 {
     public partial class MainWindow : Window
     {
-        const string RepositoryUrl = "https://github.com/brandonvers/ESeriesSwitch";
-
-        static string Version => typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "";
+        UpdateInfo? _update;
 
         public MainWindow()
         {
             Loc.Instance.SetLanguage(AppSettings.LoadLanguage());
             InitializeComponent();
-            VersionText.Text = "v" + Version;
-            Loaded += (_, _) => RefreshStatus();
+            VersionText.Text = "v" + AppInfo.VersionText;
+            Loaded += async (_, _) =>
+            {
+                RefreshStatus();
+                _update = await UpdateChecker.CheckAsync();
+                ShowUpdate();
+            };
         }
+
+        void ShowUpdate()
+        {
+            UpdateBanner.Visibility = _update != null ? Visibility.Visible : Visibility.Collapsed;
+            if (_update != null)
+                UpdateText.Text = Loc.T("UpdateAvailable", _update.Version.ToString(3), AppInfo.VersionText);
+        }
+
+        void DownloadUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            if (_update != null)
+                OpenUrl(_update.Url);
+        }
+
+        void DismissUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            _update = null;
+            ShowUpdate();
+        }
+
+        // Via explorer.exe, so the browser does not inherit the app's administrator rights
+        static void OpenUrl(string url) =>
+            Process.Start(new ProcessStartInfo("explorer.exe", url) { UseShellExecute = true });
 
         void RefreshStatus()
         {
             UpdateLanguageButtons();
+            ShowUpdate();
 
             EnvStatus status;
             try
@@ -239,11 +266,10 @@ namespace ESeriesSwitch
 
         void About_Click(object sender, RoutedEventArgs e)
         {
-            var answer = MessageBox.Show(this, Loc.T("AboutText", Version, RepositoryUrl),
+            var answer = MessageBox.Show(this, Loc.T("AboutText", AppInfo.VersionText, AppInfo.RepositoryUrl),
                 Title, MessageBoxButton.YesNo, MessageBoxImage.Information);
-            // Via explorer.exe, so the browser does not inherit the app's administrator rights
             if (answer == MessageBoxResult.Yes)
-                Process.Start(new ProcessStartInfo("explorer.exe", RepositoryUrl) { UseShellExecute = true });
+                OpenUrl(AppInfo.RepositoryUrl);
         }
 
         void SetBusy(bool busy)

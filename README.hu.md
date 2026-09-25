@@ -44,6 +44,7 @@ Az **ESeriesSwitch** ezt egy kattintással, biztonságosan elvégzi, és egy pil
 - **Újraindítás felajánlása** váltás után.
 - **Figyelmeztetés**, ha hiányzik az EDIABAS mappa, vagy ha felhasználói szintű változók felülírhatják a rendszerszintűeket.
 - **Angol és magyar** felület, bármikor átváltható.
+- **Értesítés új verzióról**: indításkor az app megnézi a GitHubon, van-e újabb kiadás, és ha van, *Letöltés* gombot mutat.
 - **Egyetlen hordozható `.exe`**. Nem kell telepíteni, és .NET sem kell hozzá.
 
 ## Követelmények
@@ -127,6 +128,8 @@ Az *EDIABAS interfész* kártya mutatja a jelenlegi beállítást, és egy katti
 - az `EDIABAS.INI` többi részéhez és a `C:\EC-APPS` többi fájljához
 - a hálózati beállításokhoz, az ICOM-hoz és a Windows-szolgáltatásokhoz
 
+**Hálózat:** az app egyetlen hálózati kapcsolata a frissítésellenőrzés. Indításkor egyszer lekérdezi az `api.github.com`-ról a legújabb kiadás verziószámát. Rólad és a gépedről semmilyen adatot nem küld, és semmit nem tölt le magától. Ha a gép offline, az ellenőrzés csendben kimarad.
+
 ## Mentések és visszaállítás
 
 A mentések helye: `C:\ProgramData\ESeriesSwitch\Backups\`. A **Mentések mappája** gombbal nyithatod meg.
@@ -190,6 +193,7 @@ A tároló **nem** tartalmaz BMW-szoftvert, adatfájlokat vagy más, jogvédett 
 
 ## Verziók
 
+- **1.2.0**: értesítés, ha újabb kiadás érhető el a GitHubon
 - **1.1.0**
   - Angol és magyar felület, nyelvváltóval
   - Az EDIABAS mappa automatikus felismerése (`c:\ec-apps\ediabas\bin` vagy `C:\EDIABAS\BIN`)

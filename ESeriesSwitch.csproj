@@ -15,7 +15,7 @@
     <Authors>Brendon Scheiber</Authors>
     <Copyright>Copyright © 2026 Brendon Scheiber. MIT License.</Copyright>
     <RepositoryUrl>https://github.com/brandonvers/ESeriesSwitch</RepositoryUrl>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
 
     <!-- The WPF Fluent theme (ThemeMode) is still marked as experimental -->
     <NoWarn>$(NoWarn);WPF0001</NoWarn>

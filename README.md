@@ -44,6 +44,7 @@ So the legacy tools only work **with** the environment variables, and ISTA+ only
 - **Restart offer** after switching.
 - **Warnings** if the EDIABAS folder is missing or if user-level variables could override the system ones.
 - **English and Hungarian** user interface, switchable at any time.
+- **Update notification**: on startup the app checks GitHub for a newer release and shows a *Download* button if there is one.
 - A **single portable `.exe`**. No installation and no .NET runtime needed.
 
 ## Requirements
@@ -127,6 +128,8 @@ The *EDIABAS interface* card shows the current setting and switches it with one 
 - the rest of `EDIABAS.INI` and of `C:\EC-APPS`
 - network settings, the ICOM or Windows services
 
+**Network:** the only connection the app makes is the update check, a single request to `api.github.com` on startup that reads the latest release number. No data about you or your PC is sent, and nothing is downloaded automatically. If the PC is offline, the check is skipped silently.
+
 ## Backups and restoring
 
 Backups are stored in `C:\ProgramData\ESeriesSwitch\Backups\`. Open this folder with the **Backups folder** button.
@@ -190,6 +193,7 @@ This repository contains **no** BMW software, data files or other proprietary ma
 
 ## Changelog
 
+- **1.2.0**: update notification when a newer release is available on GitHub
 - **1.1.0**
   - English and Hungarian user interface with a language switcher
   - Automatic detection of the EDIABAS folder (`c:\ec-apps\ediabas\bin` or `C:\EDIABAS\BIN`)

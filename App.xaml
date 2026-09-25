@@ -10,5 +10,7 @@
         <SolidColorBrush x:Key="MixedBrush" Color="#D13438"/>
         <SolidColorBrush x:Key="WarningBackgroundBrush" Color="#26F7B500"/>
         <SolidColorBrush x:Key="WarningBorderBrush" Color="#80F7B500"/>
+        <SolidColorBrush x:Key="UpdateBackgroundBrush" Color="#260078D4"/>
+        <SolidColorBrush x:Key="UpdateBorderBrush" Color="#800078D4"/>
     </Application.Resources>
 </Application>

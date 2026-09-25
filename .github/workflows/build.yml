@@ -1,0 +1,39 @@
+name: Build
+
+# Every push / pull request: check that the app builds.
+# Pushing a version tag (e.g. v1.2.0): also create a draft release with the exe attached.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish single-file exe
+        run: dotnet publish ESeriesSwitch.csproj -p:PublishProfile=FolderProfile
+
+      - name: Upload exe as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ESeriesSwitch
+          path: bin/publish/ESeriesSwitch.exe
+
+      - name: Create draft release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: bin/publish/ESeriesSwitch.exe

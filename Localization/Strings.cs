@@ -42,6 +42,11 @@ namespace ESeriesSwitch.Localization
             ["OpenBackups"] = "Backups folder",
             ["About"] = "About",
 
+            // Update check
+            ["UpdateAvailable"] = "A new version is available: v{0} (you have v{1})",
+            ["Download"] = "Download",
+            ["Hide"] = "Hide",
+
             // Warnings
             ["WarnConfigDirMissingFolder"] = "{0} points to a folder that does not exist: {1}",
             ["WarnFolderMissing"] = "The EDIABAS folder was not found on this computer ({0}).",
@@ -110,6 +115,11 @@ namespace ESeriesSwitch.Localization
             ["Refresh"] = "Frissítés",
             ["OpenBackups"] = "Mentések mappája",
             ["About"] = "Névjegy",
+
+            // Update check
+            ["UpdateAvailable"] = "Új verzió érhető el: v{0} (a tiéd: v{1})",
+            ["Download"] = "Letöltés",
+            ["Hide"] = "Elrejtés",
 
             // Warnings
             ["WarnConfigDirMissingFolder"] = "Az {0} egy nem létező mappára mutat: {1}",

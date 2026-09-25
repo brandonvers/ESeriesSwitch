@@ -31,6 +31,25 @@
                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                    Text="{Binding [Subtitle], Source={x:Static loc:Loc.Instance}}"/>
 
+        <!-- Update available -->
+        <Border x:Name="UpdateBanner" Visibility="Collapsed" Margin="0,-8,0,16" Padding="14,10"
+                CornerRadius="6" BorderThickness="1"
+                Background="{StaticResource UpdateBackgroundBrush}"
+                BorderBrush="{StaticResource UpdateBorderBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="UpdateText" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,12,0"/>
+                <Button Grid.Column="1" Style="{DynamicResource AccentButtonStyle}" Click="DownloadUpdate_Click"
+                        Content="{Binding [Download], Source={x:Static loc:Loc.Instance}}"/>
+                <Button Grid.Column="2" Margin="6,0,0,0" Padding="10,4" Content="✕" Click="DismissUpdate_Click"
+                        ToolTip="{Binding [Hide], Source={x:Static loc:Loc.Instance}}"/>
+            </Grid>
+        </Border>
+
         <!-- Status card -->
         <Border CornerRadius="8" BorderThickness="1" Padding="0"
                 Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
